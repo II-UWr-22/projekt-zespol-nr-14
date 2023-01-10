@@ -18,6 +18,7 @@ set( SOURCES
     src/strange_poker.c
     include/card.h
     include/player.h
+    include/ui.h
 )
 
 add_executable( StrangePoker ${SOURCES} )
