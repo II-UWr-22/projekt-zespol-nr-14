@@ -50,7 +50,9 @@ typedef struct IuiHandler_t
     prompt user to choose bid amount
 
     returns:
-        amount of money bid or UINT64_MAX if all-in
+        amount of money bid
+        UINT64_MAX if all-in
+        0 if pass
     */
     uint64_t (*bid)( void *data, uint32_t currentPlayer );
 
