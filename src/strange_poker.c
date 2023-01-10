@@ -20,8 +20,18 @@ int main()
         GameMenuOptions opt = ui->gameMenu( ui->data );
         if( opt == ExitGame ) break;
 
-        if( opt == StartNewRound ) {}; // ?????
+        if( opt == StartNewRound ) 
+        {
+            uint32_t playerCnt;
+            player_t *players = ui->getPlayers( ui->data, &playerCnt );
+            for( uint32_t i = 0; i < playerCnt; i++ )
+            {
+                players[i].bid = 0;
+                players[i].validCards = 0;
+            }
+            
+        }; // ?????
     }
-    
+
     ui->destroy( ui->data );
 }

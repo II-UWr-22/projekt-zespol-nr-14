@@ -12,6 +12,17 @@ typedef enum GameMenuOptions
 } GameMenuOptions;
 
 /*
+supplied by user to uiHandler
+*/
+typedef struct GameContext_t
+{
+    uint32_t currentPlayer;
+    uint64_t moneyOnTable;
+    
+    uint32_t visibleTableCards;
+    card_t tableCards[5];
+} GameContext_t;
+/*
 Interface to uiHandler implementation.
 It will not check validity of input so other checks are required.
 */
@@ -44,7 +55,7 @@ typedef struct IuiHandler_t
     returns:
         index of dropped card
     */
-    uint32_t (*drop)( void *data, uint32_t currentPlayer );
+    uint32_t (*drop)( void *data, const GameContext_t *context );
 
     /*
     prompt user to choose bid amount
@@ -54,20 +65,20 @@ typedef struct IuiHandler_t
         UINT64_MAX if all-in
         0 if pass
     */
-    uint64_t (*bid)( void *data, uint32_t currentPlayer );
+    uint64_t (*bid)( void *data, const GameContext_t *context );
 
     /*
     print a message to a user
 
     call it if user inputted invalid data
     */
-    void (*messageUser)( void *data, uint32_t currentPlayer, const char *msg );
+    void (*messageUser)( void *data, const GameContext_t *context, const char *msg );
 
     /*
     update state.
     call it after external change of player_t members
     */
-    void (*updateState)( void *data, uint32_t currentPlayer );
+    void (*updateState)( void *data, const GameContext_t *context );
 
     /*
     destroy uiHandler

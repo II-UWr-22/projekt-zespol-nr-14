@@ -93,7 +93,7 @@ static GameMenuOptions gameMenu( void *data )
                 THIS.numpl += 1;
                 {
                     player_t *pl = &THIS.players[THIS.numpl - 1];
-                    char *name = calloc( strlen(buff) + 1, 1 );
+                    char *name = (char *)calloc( strlen(buff) + 1, 1 );
 
                     if( !name )
                     {
@@ -156,18 +156,19 @@ static GameMenuOptions gameMenu( void *data )
     }
 }
 
-static void updateState( void *data, uint32_t pl )
+static void updateState( void *data, const GameContext_t *ctx )
 {
     (void)data;
     clear();
-    printw("Strange Poker, player %d", pl);
+    printw("Strange Poker, player %d", ctx->currentPlayer);
     refresh();
 }
 
-static uint32_t drop( void *data, uint32_t pl )
+static uint32_t drop( void *data, const GameContext_t *ctx )
 {
-    updateState( data, pl );
-    printw("What card to drop (index)");
+    updateState( data, ctx );
+    printw("What card to drop (index)\n");
+    refresh();
 
     uint32_t dr;
     scanw("%" SCNu32, &dr);
@@ -175,13 +176,14 @@ static uint32_t drop( void *data, uint32_t pl )
     return dr;
 }
 
-static uint64_t bid( void *data, uint32_t pl )
+static uint64_t bid( void *data, const GameContext_t *ctx  )
 {
-    updateState(data, pl);
+    updateState(data, ctx);
 
     while( true )
     {
-        printw("What amount of money bid (number, 'ALL-IN' or 'PASS')");
+        move( LINES - 3, 0 );
+        printw("What amount of money bid (number, 'ALL-IN' or 'PASS')\n");
 
         char buff[256];
         getnstr(buff, sizeof(buff) );
@@ -194,10 +196,12 @@ static uint64_t bid( void *data, uint32_t pl )
     }
 }
 
-static void messageUser( void *data, uint32_t pl, const char *msg )
+static void messageUser( void *data, const GameContext_t *ctx, const char *msg )
 {
-    updateState( data, pl );
+    updateState( data, ctx );
+    move( LINES - 1, 0 );
     printw("%s", msg );
+    refresh();
 }
 
 static void destroy( void *data )
