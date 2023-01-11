@@ -5,6 +5,7 @@ set( SOURCES
     ncurses.c    
 )
 
+set( CURSES_NEED_WIDE TRUE )
 find_package(Curses REQUIRED)
 
 add_library( ui-ncurses SHARED ${SOURCES} )

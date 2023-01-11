@@ -29,8 +29,20 @@ int main()
                 players[i].bid = 0;
                 players[i].validCards = 0;
             }
-            
-        }; // ?????
+
+            GameContext_t ctx;
+            ctx.currentPlayer = 0;
+            ctx.moneyOnTable = 0;
+            ctx.visibleTableCards = 0;
+
+            if( playerCnt == 0 )
+            {
+                ui->messageUser( ui->data, &ctx, "No players to play!" );
+                continue;
+            }
+
+            // ?????
+        }; 
     }
 
     ui->destroy( ui->data );

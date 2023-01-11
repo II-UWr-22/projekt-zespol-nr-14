@@ -2,6 +2,7 @@
 #include <memory.h>
 #include <stdlib.h>
 #include <inttypes.h>
+#include <locale.h>
 
 #include <ncurses.h>
 
@@ -20,8 +21,9 @@ typedef struct MyUIHandler_t {
 #define THIS (*(dat_t*)data)
 static int initialize( void *data )
 {
-    (void)data;
+    setlocale(LC_ALL,"");
     if( !initscr() ) return -1;
+
 
     THIS.numpl = 0;
     THIS.players = NULL;
@@ -62,7 +64,7 @@ static GameMenuOptions gameMenu( void *data )
         for( uint32_t i = 0; i < THIS.numpl; i++ )
         {
             move(3+i,COLS/2 + 4);
-            printw("%4" PRIu32 " %10s: %8" PRIu64 "$", i, THIS.players[i].name, THIS.players[i].balance );
+            printw("%4" PRIu32 " %15s: %8" PRIu64 "$", i, THIS.players[i].name, THIS.players[i].balance );
         }
 
         move(LINES - 3, 0);
@@ -109,7 +111,7 @@ static GameMenuOptions gameMenu( void *data )
             case 1:
                 printw( "what player to remove (index) (-1 to cancel)?\n" );
 
-                do
+                while( true )
                 {
                     move( LINES - 2, 0 );
                     clrtoeol();
@@ -122,7 +124,6 @@ static GameMenuOptions gameMenu( void *data )
                     move( LINES - 1, 0 );
                     printw("invalid player index!");
                 }
-                while( true );
 
                 if( index <= -1 ) break;
 
@@ -156,22 +157,69 @@ static GameMenuOptions gameMenu( void *data )
     }
 }
 
+static int hiddenCard = 0x1F0A0;
+static int cardToUnicode( const card_t *card )
+{
+    int suitOff = card->suit;
+    int valOff = card->value == 14 ? 1 : card->value;
+
+    return hiddenCard + suitOff * 0x10 + valOff;
+}
+
 static void updateState( void *data, const GameContext_t *ctx )
 {
-    (void)data;
     clear();
-    printw("Strange Poker, player %d", ctx->currentPlayer);
+    move(0, COLS/2 - 6);
+    printw("Strange Poker");
+
+    move( 1, 0 );
+    printw("players:\n");
+    printw("%5s %15s %8s %8s %s\n", "", "name", "balance", "bid", "cards");
+    for( uint32_t i = 0; i < THIS.numpl; i++ )
+    {
+        const player_t *pl = &THIS.players[i];
+        printw("%s %15s ", i == ctx->currentPlayer ? " --->" : "     ", pl->name );
+        printw("%8" PRIu64 " ", pl->balance );
+        if( pl->bid == UINT64_MAX ) printw("%8s ", "ALL-IN");
+        else if( pl->bid == 0 ) printw("%8s ", "");
+        else printw("%8" PRIu64 " ", pl->bid );
+
+        for( uint32_t j = 0; j < pl->validCards; j++ )
+            printw("%lc ", ctx->currentPlayer == i ? cardToUnicode(&pl->cards[j]) : hiddenCard );
+
+        printw("\n"); 
+    }
+
+    mvprintw( 1, COLS/2, "table:");
+    move( 2, COLS/2 );
+    for( uint32_t j = 0; j < ctx->visibleTableCards; j++ )
+        printw("%lc ", cardToUnicode(&ctx->tableCards[j]) );
+    mvprintw( 3, COLS/2, "%" PRIu64 "$ on the table", ctx->moneyOnTable );
+    
     refresh();
 }
 
 static uint32_t drop( void *data, const GameContext_t *ctx )
 {
     updateState( data, ctx );
-    printw("What card to drop (index)\n");
-    refresh();
 
+    move(LINES - 3, 0);
+    printw("What card to drop (index)\n");
+    
     uint32_t dr;
-    scanw("%" SCNu32, &dr);
+    while( true )
+    {
+        move( LINES - 2, 0 );
+        clrtoeol();
+        refresh();
+
+        scanw("%" SCNu32, &dr);
+
+        if( dr < THIS.players[ctx->currentPlayer].validCards ) break;
+
+        move( LINES - 1, 0 );
+        printw("invalid card index!");
+    }
 
     return dr;
 }
@@ -179,11 +227,15 @@ static uint32_t drop( void *data, const GameContext_t *ctx )
 static uint64_t bid( void *data, const GameContext_t *ctx  )
 {
     updateState(data, ctx);
-
+    
+    move( LINES - 3, 0 );    
+    printw("What amount of money bid (number > 0, 'ALL-IN' or 'PASS')\n");
+        
     while( true )
     {
-        move( LINES - 3, 0 );
-        printw("What amount of money bid (number, 'ALL-IN' or 'PASS')\n");
+        move( LINES - 2, 0 );
+        clrtoeol();
+        refresh();
 
         char buff[256];
         getnstr(buff, sizeof(buff) );
@@ -192,16 +244,21 @@ static uint64_t bid( void *data, const GameContext_t *ctx  )
         if( strcmp(buff, "PASS") == 0) return 0;
         
         uint64_t v = strtoull(buff, NULL, 10);
-        if( v != 0 ) return v;
+
+        if( v != 0 && v <= THIS.players[ctx->currentPlayer].balance ) return v;
+        
+        move( LINES - 1, 0 );
+        printw("invalid bid value! Must be >0 and <=budget or 'ALL-IN' or 'PASS'");
     }
 }
 
 static void messageUser( void *data, const GameContext_t *ctx, const char *msg )
 {
     updateState( data, ctx );
-    move( LINES - 1, 0 );
-    printw("%s", msg );
+    move( LINES - 2, 0 );
+    printw("%s\npress enter to continue...", msg );
     refresh();
+    wgetch(stdscr);
 }
 
 static void destroy( void *data )
