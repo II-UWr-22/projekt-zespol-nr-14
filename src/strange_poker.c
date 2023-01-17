@@ -4,11 +4,12 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-int main()
-{  
-    printf("Hello World! 🂡 🂢 🂣 🂤 🂥 🂦 🂧 🂨 🂩 🂪 🂫 🂬 🂭 🂮\n");
+int main(int argc, char *argv[])
+{
+    const char *backendName = "ncurses";
+    if( argc > 1 ) backendName = argv[1];
 
-    IuiHandler_t *ui = uiHandlerFactory("ncurses");
+    IuiHandler_t *ui = uiHandlerFactory(backendName);
     if( !ui )
     {
         fprintf(stderr, "cannot crate ui system\n");
@@ -42,7 +43,7 @@ int main()
             }
 
             // ?????
-        }; 
+        }
     }
 
     ui->destroy( ui->data );
