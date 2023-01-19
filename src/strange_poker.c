@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+int cards[52];
+
 int main(int argc, char *argv[])
 {
     const char *backendName = "ncurses";
@@ -40,6 +42,25 @@ int main(int argc, char *argv[])
             {
                 ui->messageUser( ui->data, &ctx, "No players to play!" );
                 continue;
+            }
+            
+            time_t t;
+            srand((unsigned) time(&t));
+            for (uint32_t i = 0; i < playerCnt; i++){
+                for (int j=0; j<5;j++){
+                    int c=rand() % 52;
+                       while(cards[c]!=0) c=rand() % 52;
+                        players[i].cards[j]->suit=c/4;
+                        players[i].cards[j]->value=(c%13)+2;
+                        cards[c]=1;
+                }
+            }
+            for (int i=0; i<5;j++){
+                int c=rand() % 52;
+                while(cards[c]!=0) c=rand() % 52;
+                tableCards[i]->suit=c/4;
+                tableCards[i]->value=(c%13)+2;
+                cards[c]=1;
             }
 
             // ?????
