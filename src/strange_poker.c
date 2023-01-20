@@ -17,6 +17,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "cannot crate ui system\n");
         return -1;
     }
+
     srand((unsigned int) time(NULL));
     
     while( 1 ) 
@@ -66,6 +67,9 @@ int main(int argc, char *argv[])
                 ctx.tableCards[i].value=(c%13)+2;
                 cards[c]='1';
             }
+
+            // show beginning of the game and wait for input
+            ui->messageUser( ui->data, &ctx, "Start Game!" );
             
 
             // ?????
@@ -73,4 +77,5 @@ int main(int argc, char *argv[])
     }
 
     ui->destroy( ui->data );
+    return 0;
 }
