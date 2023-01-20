@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-int cards[52];
 
 int main(int argc, char *argv[])
 {
@@ -18,6 +17,7 @@ int main(int argc, char *argv[])
         return -1;
     }
     srand((unsigned int) time(NULL));
+    int *card=malloc(sizeof(int)*52);
     
     while( 1 ) 
     {
@@ -46,26 +46,32 @@ int main(int argc, char *argv[])
             }
             
             //dealing cards
+            
+            for(int i=0; i<52;i++){
+                *(tab+i)=0;
+            }
             for (uint32_t i = 0; i < playerCnt; i++){
                 for (int j=0; j<5;j++){
                     int c=rand() % 52;
-                       while(cards[c]!=0) c=rand() % 52;
-                        players[i].cards[j]->suit=c/4;
-                        players[i].cards[j]->value=(c%13)+2;
-                        cards[c]=1;
+                       while(*(card+c)!=0) c=rand() % 52;
+                        players[i]->cards[j]->suit=c/4;
+                        players[i]->cards[j]->value=(c%13)+2;
+                        *(card+i)=1;
                 }
             }
-            for (int i=0; i<5;j++){
+            for (int i=0; i<5;i++){
                 int c=rand() % 52;
-                while(cards[c]!=0) c=rand() % 52;
-                tableCards[i]->suit=c/4;
-                tableCards[i]->value=(c%13)+2;
-                cards[c]=1;
+                while(*(card+c)!=0) c=rand() % 52;
+                ctx.tableCards[i]->suit=c/4;
+                ctx.tableCards[i]->value=(c%13)+2;
+                *(card+i)=1;
             }
+            
 
             // ?????
         }
     }
+    free(card);
 
     ui->destroy( ui->data );
 }
