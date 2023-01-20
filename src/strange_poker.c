@@ -2,9 +2,18 @@
 #include <ui.h>
 #include <time.h>
 #include <stdlib.h>
-#include <unistd.h>
 
-char cards[52];
+card_t randCard( char used[52] )
+{
+    card_t res;
+    int c=rand() % 52;
+    while(used[c]!=0) c=rand() % 52;
+    res.suit=c%4;
+    res.value=(c/13)+2;
+    used[c]=1;
+
+    return res;
+}
 
 int main(int argc, char *argv[])
 {
@@ -19,6 +28,7 @@ int main(int argc, char *argv[])
     }
 
     srand((unsigned int) time(NULL));
+    char deck[52];
     
     while( 1 ) 
     {
@@ -48,26 +58,17 @@ int main(int argc, char *argv[])
             
             //dealing cards
             
-            for(int i=0; i<52;i++){
-                cards[i]='0';
-            }
-            for (uint32_t i = 0; i < playerCnt; i++){
-                for (int j=0; j<5;j++){
-                    int c=rand() % 52;
-                       while(cards[c]!='0') c=rand() % 52;
-                        players[i].cards[j].suit=c/4;
-                        players[i].cards[j].value=(c%13)+2;
-                        cards[c]='1';
-                }
-            }
-            for (int i=0; i<5;i++){
-                int c=rand() % 52;
-                while(cards[c]!='0') c=rand() % 52;
-                ctx.tableCards[i].suit=c/4;
-                ctx.tableCards[i].value=(c%13)+2;
-                cards[c]='1';
-            }
+            for(int i = 0; i < 52; i++)
+                deck[i] = 0;
 
+            for (uint32_t i = 0; i < playerCnt; i++)
+                for (int j = 0; j < 5; j++)
+                    players[i].cards[j] = randCard( deck );
+
+            for (int i = 0; i < 5; i++)
+                ctx.tableCards[i] = randCard( deck );
+            
+            
             // show beginning of the game and wait for input
             ui->messageUser( ui->data, &ctx, "Start Game!" );
             
