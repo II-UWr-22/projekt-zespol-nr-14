@@ -48,22 +48,22 @@ int main(int argc, char *argv[])
             //dealing cards
             
             for(int i=0; i<52;i++){
-                *(tab+i)=0;
+                *(card+i)=0;
             }
             for (uint32_t i = 0; i < playerCnt; i++){
                 for (int j=0; j<5;j++){
                     int c=rand() % 52;
                        while(*(card+c)!=0) c=rand() % 52;
-                        players[i]->cards[j]->suit=c/4;
-                        players[i]->cards[j]->value=(c%13)+2;
+                        players[i].cards[j].suit=c/4;
+                        players[i].cards[j].value=(c%13)+2;
                         *(card+i)=1;
                 }
             }
             for (int i=0; i<5;i++){
                 int c=rand() % 52;
                 while(*(card+c)!=0) c=rand() % 52;
-                ctx.tableCards[i]->suit=c/4;
-                ctx.tableCards[i]->value=(c%13)+2;
+                ctx.tableCards[i].suit=c/4;
+                ctx.tableCards[i].value=(c%13)+2;
                 *(card+i)=1;
             }
             
