@@ -17,7 +17,8 @@ int main(int argc, char *argv[])
         fprintf(stderr, "cannot crate ui system\n");
         return -1;
     }
-
+    srand((unsigned int) time(NULL));
+    
     while( 1 ) 
     {
         GameMenuOptions opt = ui->gameMenu( ui->data );
@@ -44,8 +45,7 @@ int main(int argc, char *argv[])
                 continue;
             }
             
-            time_t t;
-            srand((unsigned) time(&t));
+            //dealing cards
             for (uint32_t i = 0; i < playerCnt; i++){
                 for (int j=0; j<5;j++){
                     int c=rand() % 52;
