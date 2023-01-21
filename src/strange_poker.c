@@ -71,7 +71,6 @@ int main(int argc, char *argv[])
             // ?????
         }
     }
-    free(card);
 
     ui->destroy( ui->data );
 }
