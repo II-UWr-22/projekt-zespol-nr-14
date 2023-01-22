@@ -115,8 +115,7 @@ int is_in_sequence(card_t *carts, int *start_of_sequence) {
     return 0;
 }
 
-player_t *winner_check(player_t *players, int numbers_of_player, card_t table_carts[5], int *how_many_players_win) {
-    player_t *table_of_winners = (player_t *) (calloc(numbers_of_player, sizeof(player_t)));
+player_t *winner_check(player_t *players, int numbers_of_player, card_t table_carts[5], int *how_many_players_win, player_t *table_of_winners ) {
     int player_score[numbers_of_player];//players score
     for (int i = 0; i < numbers_of_player; ++i) {
         player_score[i]=0;
