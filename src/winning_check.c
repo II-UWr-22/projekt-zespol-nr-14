@@ -7,7 +7,10 @@
 #include "player.h"
 
 int serching_for_color(card_t *carts, int *highest_c_cart) {
-    int *color = (int *) (calloc(4, sizeof(int)));
+    int color[4];
+    for (int i = 0; i < 4; ++i) {
+        color[i]=0;
+    }
     for (int i = 0; i < 7; i++) {
         color[carts[i].suit] += 1;
     }
@@ -19,18 +22,20 @@ int serching_for_color(card_t *carts, int *highest_c_cart) {
                     break;
                 }
             }
-            free(color);
             return 1;
         }
     }
     highest_c_cart[0] = 0;
-    free(color);
     return 0;
 }// works
 int fstrength_of_pair(card_t *card, int *power) {
     int count = 1;
     int value = 0;//is there 4 cart set in ahnd
-    int *pairs = (int *) (calloc(3, sizeof(int)));
+    int pairs[4];
+    for (int i = 0; i < 4; ++i) {
+        pairs[i]=0;
+    }
+
     int how_many_set = 0;
     for (int i = 0; i < 6; ++i) {
         if (card[i].value == card[i + 1].value) {
@@ -63,7 +68,6 @@ int fstrength_of_pair(card_t *card, int *power) {
     for (int i = 0; i < 3; ++i) {
         count += pairs[i];
     }
-    free(pairs);
     if (count <= 5) {
         if (count != 4) {
             if (count<4){return count;}
@@ -113,11 +117,14 @@ int is_in_sequence(card_t *carts, int *start_of_sequence) {
 
 player_t *winner_check(player_t *players, int numbers_of_player, card_t table_carts[5], int *how_many_players_win) {
     player_t *table_of_winners = (player_t *) (calloc(numbers_of_player, sizeof(player_t)));
-    int *player_score = (int *) calloc(numbers_of_player, sizeof(int));//wyniki poszczególnnych graczy
+    int player_score[numbers_of_player];//players score
+    for (int i = 0; i < numbers_of_player; ++i) {
+        player_score[i]=0;
+    }
     int highest_cart_value[numbers_of_player];//highest cart in players hand// include table carts important in looking for winer without any set
     int start_of_sequence[numbers_of_player];//cart that start sequence of "strit" // looking for winner
     int power_of_pair_carts[numbers_of_player][4];//power of cart that make sets of pair or triple
-    int highest_color_cart[numbers_of_player];//highest cart in color set/ if therw is not any color - 0
+    int highest_color_cart[numbers_of_player];//highest card in color set/ if therw is not any color - 0
     for (int i = 0; i < numbers_of_player; ++i) {
         for (int j = 0; j < 4; ++j) {
             power_of_pair_carts[i][j] = 0;
