@@ -15,6 +15,26 @@ card_t randCard( char used[52] )
     return res;
 }
 
+void bidding(uint64_t *min_bid, uint32_t val_Cards, player_t player, uint32_t *CntPlayers, IuiHandler_t *ui, GameContext_t *ctx){
+    player.validCards = val_Cards;
+    ui->updateState(ui->data, &ctx);
+    uint32_t bid = ui->bid (ui -> data, &ctx);
+    player.bid=bid;
+    while(bid < *min_bid){
+        if(bid == 0) CntPlayers--;
+        else{
+            ui->messageUser( ui->data, &ctx, "Your bid is lower then the minimal amount" );
+            uint32_t bid = ui->bid (ui -> data, &ctx);
+            player.bid=bid;
+        }
+    }
+    if(bid > *min_bid){
+        *min_bid = bid;
+    }
+    player.validCards = 0;
+    ui->updateState(ui->data, &ctx);
+}
+
 int main(int argc, char *argv[])
 {
     const char *backendName = "ncurses";
@@ -71,6 +91,39 @@ int main(int argc, char *argv[])
             
             // show beginning of the game and wait for input
             ui->messageUser( ui->data, &ctx, "Start Game!" );
+
+            //preflop bids
+            uint64_t min_bid=20;
+            players[0].bid = 10;//small blind
+            players[1].bid = 20; //big blind
+            // need to switch the first player to the last position after the end of the round
+            int last_player=0;
+            uint32_t current_players = playerCnt;
+            for( uint32_t i=2; i < playerCnt; i++){
+                ctx.currentPlayer=i;
+                uint64_t pom = min_bid;
+                bidding( &min_bid, 4, players[i], &current_players, ui, &ctx);
+                if(min_bid > pom){
+                    if (i == 0) last_player = playerCnt-1;
+                    else last_player = i-1;
+                }
+            }
+            while(players[last_player].bid < min_bid){
+                for( uint32_t i=0; i < playerCnt; i++){
+                    ctx.currentPlayer=i;
+                    uint64_t pom = min_bid;
+                    bidding( &min_bid, 4, players[i], &current_players, ui, &ctx);
+                    if(min_bid > pom){
+                        if (i == 0) last_player = playerCnt-1;
+                        else last_player = i-1;
+                    }
+                }
+            }
+            ctx.moneyOnTable = min_bid * current_players;
+
+
+            //flop
+            ctx.visibleTableCards = 3;
             
 
             // ?????
