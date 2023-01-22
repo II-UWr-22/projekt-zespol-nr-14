@@ -2,7 +2,18 @@
 #include <ui.h>
 #include <time.h>
 #include <stdlib.h>
-#include <unistd.h>
+
+card_t randCard( char used[52] )
+{
+    card_t res;
+    int c=rand() % 52;
+    while(used[c]!=0) c=rand() % 52;
+    res.suit=c%4;
+    res.value=(c/13)+2;
+    used[c]=1;
+
+    return res;
+}
 
 int main(int argc, char *argv[])
 {
@@ -16,6 +27,9 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    srand((unsigned int) time(NULL));
+    char deck[52];
+    
     while( 1 ) 
     {
         GameMenuOptions opt = ui->gameMenu( ui->data );
@@ -41,10 +55,28 @@ int main(int argc, char *argv[])
                 ui->messageUser( ui->data, &ctx, "No players to play!" );
                 continue;
             }
+            
+            //dealing cards
+            
+            for(int i = 0; i < 52; i++)
+                deck[i] = 0;
+
+            for (uint32_t i = 0; i < playerCnt; i++)
+                for (int j = 0; j < 5; j++)
+                    players[i].cards[j] = randCard( deck );
+
+            for (int i = 0; i < 5; i++)
+                ctx.tableCards[i] = randCard( deck );
+            
+            
+            // show beginning of the game and wait for input
+            ui->messageUser( ui->data, &ctx, "Start Game!" );
+            
 
             // ?????
         }
     }
 
     ui->destroy( ui->data );
+    return 0;
 }
