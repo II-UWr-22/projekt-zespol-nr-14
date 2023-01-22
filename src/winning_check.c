@@ -3,7 +3,6 @@
 //
 
 #include <stdlib.h>
-#include <stdio.h>
 #include "player.h"
 
 int serching_for_color(card_t *carts, int *highest_c_cart) {
@@ -115,7 +114,7 @@ int is_in_sequence(card_t *carts, int *start_of_sequence) {
     return 0;
 }
 
-player_t *winner_check(player_t *players, int numbers_of_player, card_t table_carts[5], int *how_many_players_win, player_t *table_of_winners ) {
+void winner_check(player_t *players, int numbers_of_player, card_t table_carts[5], int *how_many_players_win, player_t *table_of_winners ) {
     int player_score[numbers_of_player];//players score
     for (int i = 0; i < numbers_of_player; ++i) {
         player_score[i]=0;
@@ -171,7 +170,7 @@ player_t *winner_check(player_t *players, int numbers_of_player, card_t table_ca
             if (player_score[i] == max) {
                 table_of_winners[0] = players[i];
                 how_many_players_win[0]+=1;
-                return table_of_winners;
+                return;
             }
         }
     }
@@ -188,7 +187,7 @@ player_t *winner_check(player_t *players, int numbers_of_player, card_t table_ca
                 how_many_players_win[0]+=1;
             }
         }
-        return table_of_winners;
+        return;
     }
     if (max == 0) {
         for (int x = 0; x < numbers_of_player; x++) {
@@ -201,7 +200,7 @@ player_t *winner_check(player_t *players, int numbers_of_player, card_t table_ca
                 how_many_players_win[0]+=1;
             }
         }
-        return table_of_winners;
+        return;
     }
     if (max == 8 || max == 4) {
         for (int i = 0; i < numbers_of_player; ++i) {
@@ -214,7 +213,7 @@ player_t *winner_check(player_t *players, int numbers_of_player, card_t table_ca
                 how_many_players_win[0]+=1;
             }
         }
-        return table_of_winners;
+        return;
     }
     if (max==1|| max==3 || max==7){
         int place;
@@ -231,7 +230,7 @@ player_t *winner_check(player_t *players, int numbers_of_player, card_t table_ca
                 how_many_players_win[0]+=1;
             }
         }
-        return table_of_winners;
+        return;
     }
     if(max==2 || max==6){
         int place1;
@@ -253,7 +252,7 @@ player_t *winner_check(player_t *players, int numbers_of_player, card_t table_ca
                 how_many_players_win[0]+=1;
             }
         }
-        return table_of_winners;
+        return;
     }
-    return NULL;//something gone wrong
+    return;//something gone wrong
 }
