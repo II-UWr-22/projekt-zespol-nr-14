@@ -185,7 +185,7 @@ static void updateState( void *data, const GameContext_t *ctx )
         else printw("%8" PRIu64 " ", pl->bid );
 
         for( uint32_t j = 0; j < pl->validCards; j++ )
-            printw("%lc ", ctx->currentPlayer == i ? cardToUnicode(&pl->cards[j]) : hiddenCard );
+            printw("%lc ", (ctx->currentPlayer == i || ctx->currentPlayer == UINT32_MAX) ? cardToUnicode(&pl->cards[j]) : hiddenCard );
 
         printw("\n"); 
     }
