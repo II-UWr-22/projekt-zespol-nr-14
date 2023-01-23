@@ -2,6 +2,7 @@
 #include <ui.h>
 #include <time.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 card_t randCard( char used[52] )
 {
@@ -13,6 +14,65 @@ card_t randCard( char used[52] )
     used[c]=1;
 
     return res;
+}
+
+void printMessage( IuiHandler_t *ui, GameContext_t *ctx, const char *format, ... )
+{
+    va_list vl;
+    va_start( vl, format );
+    char strbuf[512];
+    strbuf[511] = '\0';
+    vsnprintf( strbuf, sizeof(strbuf)-1, format, vl );
+
+    ui->messageUser(ui->data, ctx, strbuf);
+
+    va_end( vl );
+}
+
+uint64_t bidding(uint64_t *min_bid, player_t *player, uint32_t *CntPlayers, IuiHandler_t *ui, GameContext_t *ctx){
+    uint64_t bid;
+    
+    do
+    {
+        bid = ui->bid (ui -> data, ctx);
+
+        if( bid == 0 ) // PASS 
+        {
+            (*CntPlayers)--;
+            player->validCards = 0;
+
+            return 0;
+        }
+        
+        if( bid == UINT64_MAX )
+        {
+            // TODO: support ALL-IN
+            if( *min_bid < player->balance ) *min_bid = player->balance;
+            
+            return player->bid = player->balance; // ????? 
+        }
+
+        if( bid < *min_bid )
+            ui->messageUser( ui->data, ctx, "Your have bet is lower then the minimal amount" );
+
+    } while(bid < *min_bid);
+
+    return *min_bid = player->bid = bid;
+}
+
+void bidPlayer( IuiHandler_t *ui, GameContext_t *ctx, uint32_t i, uint64_t *min_bid, uint32_t *current_players )
+{
+    uint32_t playerCnt;
+    player_t *players = ui->getPlayers( ui->data, &playerCnt );
+    
+    ctx->currentPlayer = playerCnt + 1; // do not show anyones cards!
+    printMessage( ui, ctx, "Ready player %s! (%u)", players[i].name, i );
+
+    ctx->currentPlayer = i;
+    uint64_t lastBid = players[i].bid;
+    uint64_t newBid = bidding( min_bid, &players[i], current_players, ui, ctx);
+
+    if( newBid != 0 ) ctx->moneyOnTable += newBid - lastBid;
 }
 
 int main(int argc, char *argv[])
@@ -70,8 +130,43 @@ int main(int argc, char *argv[])
             
             
             // show beginning of the game and wait for input
-            ui->messageUser( ui->data, &ctx, "Start Game!" );
+            printMessage( ui, &ctx, "Start Game!" );
+
+            for(uint32_t i = 0; i < playerCnt; i++ )
+                players[i].validCards = 4;
+
+            //preflop bids
+            ctx.moneyOnTable = 0;
+
+            uint64_t min_bid = players[0].bid = 10; //small blind
+            ctx.moneyOnTable += 10;
+
+            if( playerCnt > 1 )
+            {
+                min_bid = players[1].bid = 20; //big blind
+                ctx.moneyOnTable += 20;
+            }
             
+            // need to switch the first player to the last position after the end of the round
+            uint32_t current_players = playerCnt;
+            for( uint32_t i=2; i < playerCnt; i++)
+            {
+                bidPlayer( ui, &ctx, i, &min_bid, &current_players );
+            }
+
+            uint32_t curPlayer = 0;
+            while( current_players != 0 && 
+                    ( players[curPlayer].validCards == 0 || players[curPlayer].bid < min_bid ) )
+            {
+                if( players[curPlayer].validCards != 0 && players[curPlayer].bid != players[curPlayer].balance )
+                    bidPlayer( ui, &ctx, curPlayer, &min_bid, &current_players );
+                
+                curPlayer = ( curPlayer + 1 ) % playerCnt;
+            }
+
+            //flop
+            ctx.visibleTableCards = 3;
+            printMessage( ui, &ctx, "Flop!" );
 
             // ?????
         }
