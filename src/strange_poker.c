@@ -226,14 +226,6 @@ int main(int argc, char *argv[])
             //4th bids
             bidFunction(ui, &ctx, &min_bid, &playerCnt, 0, players);
 
-            //check the winner
-
-            //add table money to the winners balance
-
-            //switch the first player to the last position after the end of the round
-
-            // ?????
-
             ctx.currentPlayer = UINT32_MAX; // show all players' cards
             ui->updateState( ui->data, &ctx );
             
