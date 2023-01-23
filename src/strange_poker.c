@@ -171,6 +171,12 @@ int main(int argc, char *argv[])
             printMessage( ui, &ctx, "Flop!" );
 
             // ?????
+
+            //decrease player balance after game
+            for( uint32_t i=0; i < playerCnt; i++)
+            {
+                players[i].balance -= players[i].bid;
+            }
         }
     }
 
