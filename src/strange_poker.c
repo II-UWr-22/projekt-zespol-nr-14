@@ -96,6 +96,19 @@ void bidFunction(IuiHandler_t *ui, GameContext_t *ctx, uint64_t *min_bid, uint32
 
 }
 
+void drop(IuiHandler_t *ui, GameContext_t *ctx, uint32_t *playerCnt, player_t *players){
+    for(uint32_t i=0; i< *playerCnt; i++){
+        if(players[i].validCards!=0){
+            ctx.currentPlayer = *playerCnt+1;
+            printMessage( ui, ctx, "Ready player %s! (%u)", players[i].name, i );
+            ctx.currentPlayer= i;
+            uint32_t drop=ui->drop (ui -> data, ctx);
+            players[i].cards[drop]=players[i].cards[players[i].validCards-1];
+            players[i].validCards--;
+        }
+    }
+}
+
 int main(int argc, char *argv[])
 {
     const char *backendName = "ncurses";
@@ -168,22 +181,7 @@ int main(int argc, char *argv[])
                 ctx.moneyOnTable += 20;
             }
             
-            uint32_t current_players = playerCnt;
-            for( uint32_t i=2; i < playerCnt; i++)
-            {
-                bidPlayer( ui, &ctx, i, &min_bid, &current_players );
-            }
-
-            uint32_t curPlayer = 0;
-            while( current_players != 0 && 
-                    ( players[curPlayer].validCards == 0 || players[curPlayer].bid < min_bid ) )
-            {
-                if( players[curPlayer].validCards != 0 && players[curPlayer].bid != players[curPlayer].balance )
-                    bidPlayer( ui, &ctx, curPlayer, &min_bid, &current_players );
-                
-                curPlayer = ( curPlayer + 1 ) % playerCnt;
-            }
-            ctx.currentPlayer= playerCnt+1;
+            bidFunction(ui, &ctx, &min_bid, &playerCnt, 2, players);
 
             //flop
             ctx.visibleTableCards = 3;
@@ -191,21 +189,9 @@ int main(int argc, char *argv[])
 
             //2nd bids
             bidFunction(ui, &ctx, &min_bid, &playerCnt, 0, players);
-            ctx.currentPlayer= playerCnt+1;
 
             //drop the 4th card
-            for(uint32_t i=0; i< playerCnt; i++){
-                if(players[i].validCards!=0){
-                    ctx.currentPlayer= playerCnt+1;
-                    printMessage( ui, &ctx, "Ready player %s! (%u)", players[i].name, i );
-                    ctx.currentPlayer= i;
-                    uint32_t drop=ui->drop (ui -> data, &ctx);
-                    players[i].cards[drop]=players[i].cards[players[i].validCards-1];
-                    players[i].validCards--;
-                }
-
-            }
-            ctx.currentPlayer= playerCnt+1;
+            drop(ui, &ctx, &playerCnt, players);
 
             //turn
             ctx.visibleTableCards = 4;
@@ -213,34 +199,16 @@ int main(int argc, char *argv[])
             
             //3rd bids
             bidFunction(ui, &ctx, &min_bid, &playerCnt, 0, players);
-            ctx.currentPlayer= playerCnt+1;
 
             //drop the 3rd card
-            for(uint32_t i=0; i< playerCnt; i++){
-                if(players[i].validCards!=0){
-                    ctx.currentPlayer= playerCnt+1;
-                    printMessage( ui, &ctx, "Ready player %s! (%u)", players[i].name, i );
-                    ctx.currentPlayer= i;
-                    uint32_t drop=ui->drop (ui -> data, &ctx);
-                    players[i].cards[drop]=players[i].cards[players[i].validCards-1];
-                    players[i].validCards--;
-                }
-
-            }
-            ctx.currentPlayer= playerCnt+1;
+            drop(ui, &ctx, &playerCnt, players);
 
             //river
-            ctx.visibleTableCards = 4;
+            ctx.visibleTableCards = 5;
             printMessage( ui, &ctx, "River!" );
             
             //4th bids
             bidFunction(ui, &ctx, &min_bid, &playerCnt, 0, players);
-            ctx.currentPlayer= playerCnt+1;
-
-            //subtract bids from players balance
-            for(uint32_t i=0; i< playerCnt; i++){
-                players[i].balance = players[i].balance - players[i].bid;
-            }
 
             //check the winner
 
