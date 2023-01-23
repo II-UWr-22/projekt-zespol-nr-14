@@ -9,4 +9,5 @@ sudo apt install build-essential cmake libncurses-dev
 mkdir build && cd build
 cmake ..
 cmake --build .
+./StrangePoker
 ```
