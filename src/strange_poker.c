@@ -1,7 +1,9 @@
 #include <stdio.h>
-#include <ui.h>
 #include <time.h>
 #include <stdlib.h>
+
+#include "winning_check.h"
+#include "ui.h"
 
 card_t randCard( char used[52] )
 {
