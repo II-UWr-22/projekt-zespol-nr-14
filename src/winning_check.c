@@ -137,6 +137,12 @@ void winner_check(int numbers_of_players, player_t players[], card_t table_cards
         }
     }
     for (int i = 0; i < numbers_of_players; ++i) {
+        if( players[i].validCards == 0 )
+        {
+            player_score[i] = -1;
+            continue;
+        }
+
         card_t player_card[7];
         for (int j = 0; j < 5; ++j) {
             player_card[j] = table_cards[j];
@@ -179,6 +185,9 @@ void winner_check(int numbers_of_players, player_t players[], card_t table_cards
                 count) { how_many_player_with_this_same_amount_of_points = count; }
         } else count = 0;
     }
+    
+    if( max == -1 ) return;
+
     if (how_many_player_with_this_same_amount_of_points == 0) {
         for (int i = 0; i < numbers_of_players; ++i) {
             if (player_score[i] == max) {
