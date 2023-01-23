@@ -84,7 +84,7 @@ static GameMenuOptions gameMenu( void *data )
             case 0: 
                 printw( "what is the name and budget of the new player?\n" );
                 refresh();
-                scanw("%256s %" SCNu64, buff, &budget);
+                if( scanw("%256s %" SCNu64, buff, &budget) != 2 ) break;
                 tmpptr = realloc( THIS.players, sizeof(player_t) * (THIS.numpl+1) );
                 if( !tmpptr )
                 {
@@ -95,6 +95,8 @@ static GameMenuOptions gameMenu( void *data )
                 THIS.numpl += 1;
                 {
                     player_t *pl = &THIS.players[THIS.numpl - 1];
+                    pl->name = NULL;
+                    
                     char *name = (char *)calloc( strlen(buff) + 1, 1 );
 
                     if( !name )
@@ -117,7 +119,8 @@ static GameMenuOptions gameMenu( void *data )
                     clrtoeol();
                     refresh();
 
-                    scanw("%" SCNd32, &index);
+                    if( scanw("%" SCNd32, &index) != 1 )
+                        index = -1;
 
                     if( index < (int32_t)THIS.numpl ) break;
 
@@ -128,9 +131,13 @@ static GameMenuOptions gameMenu( void *data )
                 if( index <= -1 ) break;
 
                 free( (void*)THIS.players[index].name );
+                THIS.players[index].name = NULL;
+
                 if( THIS.numpl - index - 1 > 0 )
                     memmove( THIS.players + index, THIS.players + index + 1, sizeof(player_t) * (THIS.numpl - index - 1) );
                 
+                THIS.numpl -= 1;
+
                 tmpptr = realloc( THIS.players, sizeof(player_t) * THIS.numpl-1 );
                 if( !tmpptr )
                 {
@@ -138,7 +145,6 @@ static GameMenuOptions gameMenu( void *data )
                     return ExitGame;
                 }
                 THIS.players = (player_t*)tmpptr;
-                THIS.numpl -= 1;
                 break;
             case 2: return StartNewRound;
             case 3: return ExitGame;
