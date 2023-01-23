@@ -1,7 +1,8 @@
-#include "../include/player.h"
+#include "winning_check.h"
 #include <stdio.h>
+#include <stdlib.h>
 
-void looking_for_winner(int p_amount, int max, int arr[p_amount], int player_score[p_amount],int *how_many_players_win, int *table_of_winners){
+void looking_for_winner(int p_amount, int max, int arr[], int player_score[],int *how_many_players_win, int *table_of_winners){
     int max_value = 0;
     for (int i = 0; i < p_amount; ++i) {
         if (player_score[i] == max && arr[i] > max_value) { max_value = arr[i]; }
@@ -92,17 +93,12 @@ int fstrength_of_pair(card_t *card, int *power) {
         else return 2;
     }
     return 0;
-}//
-void buble_sort_for_carts(card_t *cards) {
-    for (int i = 0; i < 6; ++i) {
-        for (int j = 0; j < 6 - i; ++j) {
-            if (cards[j].value < cards[j + 1].value) {
-                card_t par = cards[j + 1];
-                cards[j + 1] = cards[j];
-                cards[j] = par;
-            }
-        }
-    }
+}
+
+// compare for ascending values
+int card_cmp(const void *a, const void *b)
+{
+    return -(int)( ((const card_t*)a)->value - ((const card_t*)b)->value );
 }
 
 int is_in_sequence(card_t *cards, int *start_of_sequence) {
@@ -125,7 +121,7 @@ int is_in_sequence(card_t *cards, int *start_of_sequence) {
     return 0;
 }
 
-void winner_check(int numbers_of_players, player_t players[numbers_of_players], card_t table_cards[5],
+void winner_check(int numbers_of_players, player_t players[], card_t table_cards[5],
                   int *how_many_players_win, int *table_of_winners) {
     int player_score[numbers_of_players];//players score
     for (int i = 0; i < numbers_of_players; ++i) {
@@ -141,14 +137,20 @@ void winner_check(int numbers_of_players, player_t players[numbers_of_players], 
         }
     }
     for (int i = 0; i < numbers_of_players; ++i) {
-        if (players[i].validCards==0){player_score[i]=-1;continue;}
+        if( players[i].validCards == 0 )
+        {
+            player_score[i] = -1;
+            continue;
+        }
         card_t player_card[7];
         for (int j = 0; j < 5; ++j) {
             player_card[j] = table_cards[j];
         }
         player_card[5] = players[i].cards[0];
         player_card[6] = players[i].cards[1];
-        buble_sort_for_carts(player_card);
+        
+        qsort(player_card, 7, sizeof(card_t), card_cmp);
+
         highest_cart_value[i] = player_card[0].value;
         int is_sequence = is_in_sequence(player_card, &start_of_sequence[i]);
         int is_color = serching_for_color(player_card, &highest_color_card[i]);
@@ -182,6 +184,9 @@ void winner_check(int numbers_of_players, player_t players[numbers_of_players], 
                 count) { how_many_player_with_this_same_amount_of_points = count; }
         } else count = 0;
     }
+    
+    if( max == -1 ) return;
+
     if (how_many_player_with_this_same_amount_of_points == 0) {
         for (int i = 0; i < numbers_of_players; ++i) {
             if (player_score[i] == max) {

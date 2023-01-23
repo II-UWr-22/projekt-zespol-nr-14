@@ -17,13 +17,14 @@ if (USE_ALL_WARNINGS)
 endif ()
 
 set(SOURCES
-        src/strange_poker.c
-        src/ui.c
-        src/winning_check.c
-        include/card.h
-        include/player.h
-        include/ui.h
-		include/winning_check.h)
+    src/strange_poker.c
+    src/ui.c
+    src/winning_check.c
+    include/card.h
+    include/player.h
+    include/ui.h
+    include/winning_check.h
+)
 
 add_executable(StrangePoker ${SOURCES})
 target_include_directories(StrangePoker PUBLIC include)
