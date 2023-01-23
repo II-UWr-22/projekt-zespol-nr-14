@@ -141,6 +141,7 @@ void winner_check(int numbers_of_players, player_t players[numbers_of_players], 
         }
     }
     for (int i = 0; i < numbers_of_players; ++i) {
+        if (players[i].validCards==0){player_score[i]=-1;continue;}
         card_t player_card[7];
         for (int j = 0; j < 5; ++j) {
             player_card[j] = table_cards[j];
