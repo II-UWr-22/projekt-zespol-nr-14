@@ -2,6 +2,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <inttypes.h>
 
 #include "winning_check.h"
 #include "ui.h"
@@ -140,11 +141,25 @@ int main(int argc, char *argv[])
             //preflop bids
             ctx.moneyOnTable = 0;
 
-            uint64_t min_bid = players[0].bid = 10; //small blind
+            uint64_t min_bid = 0;
+            
+            if( players[0].balance < 10 )
+            {
+                printMessage( ui, &ctx, "%s (%d) does not have enough money (min 10)!", players[0].name, 0 );
+                continue;
+            }
+
+            players[0].bid = 10; //small blind
             ctx.moneyOnTable += 10;
 
             if( playerCnt > 1 )
             {
+                if( players[1].balance < 20 )
+                {
+                    printMessage( ui, &ctx, "%s (%d) does not have enough money (min 20)!", players[1].name, 1 );
+                    continue;
+                }
+
                 min_bid = players[1].bid = 20; //big blind
                 ctx.moneyOnTable += 20;
             }
@@ -168,26 +183,40 @@ int main(int argc, char *argv[])
 
             //flop
             ctx.visibleTableCards = 3;
+            ctx.currentPlayer = playerCnt + 1; // do not show players' cards
             printMessage( ui, &ctx, "Flop!" );
 
             // ?????
 
-            //decrease player balance after game
-            for( uint32_t i=0; i < playerCnt; i++)
-            {
-                players[i].balance -= players[i].bid;
-            }
-
-            int winnersCnt = 0;
-            int winnersTable[playerCnt];
-            winner_check(playerCnt, players, ctx.tableCards, &winnersCnt, winnersTable);
-            uint64_t winnerMoney = ctx.moneyOnTable / winnersCnt;
+            ctx.currentPlayer = UINT32_MAX; // show all players' cards
+            ui->updateState( ui->data, &ctx );
             
-            //add money for winners to balance
-            for( int i = 0; i < winnersCnt; i++)
+            int winnerCnt = 0;
+            int winnersTable[playerCnt];
+            winner_check(playerCnt, players, ctx.tableCards, &winnerCnt, winnersTable);
+
+            if( winnerCnt != 0 )
             {
-                players[winnersTable[i]].balance += winnerMoney;
-            }
+                uint64_t winnerMoney = ctx.moneyOnTable / winnerCnt;
+                int rem = (int)( ctx.moneyOnTable - winnerMoney * winnerCnt );
+
+                //decrease player balance after game
+                for( uint32_t i=0; i < playerCnt; i++)
+                    players[i].balance -= players[i].bid;
+                
+                //add money for winners to balance
+                for( int i = 0; i < winnerCnt; i++)
+                    players[winnersTable[i]].balance += winnerMoney + (int)(i < rem);
+                
+                for( int i = 0; i < winnerCnt; i++)
+                {
+                    player_t *pl = &players[winnersTable[i]];
+                    uint64_t gain = winnerMoney + (int)(i < rem) - pl->bid;
+
+                    printMessage( ui, &ctx, "%s (%d) gained %"PRIu64"!", pl->name, i, gain );
+                }
+                
+            } else printMessage( ui, &ctx, "Nobody won :(");
         }
     }
 
