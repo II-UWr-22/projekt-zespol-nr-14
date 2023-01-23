@@ -123,6 +123,8 @@ int is_in_sequence(card_t *cards, int *start_of_sequence) {
 
 void winner_check(int numbers_of_players, player_t players[], card_t table_cards[5],
                   int *how_many_players_win, int *table_of_winners) {
+    *how_many_players_win = 0;
+    
     int player_score[numbers_of_players];//players score
     for (int i = 0; i < numbers_of_players; ++i) {
         player_score[i] = 0;
