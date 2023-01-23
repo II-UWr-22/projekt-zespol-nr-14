@@ -99,9 +99,9 @@ void bidFunction(IuiHandler_t *ui, GameContext_t *ctx, uint64_t *min_bid, uint32
 void drop(IuiHandler_t *ui, GameContext_t *ctx, uint32_t *playerCnt, player_t *players){
     for(uint32_t i=0; i< *playerCnt; i++){
         if(players[i].validCards!=0){
-            ctx.currentPlayer = *playerCnt+1;
+            ctx->currentPlayer = *playerCnt+1;
             printMessage( ui, ctx, "Ready player %s! (%u)", players[i].name, i );
-            ctx.currentPlayer= i;
+            ctx->currentPlayer= i;
             uint32_t drop=ui->drop (ui -> data, ctx);
             players[i].cards[drop]=players[i].cards[players[i].validCards-1];
             players[i].validCards--;
