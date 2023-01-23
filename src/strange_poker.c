@@ -177,6 +177,17 @@ int main(int argc, char *argv[])
             {
                 players[i].balance -= players[i].bid;
             }
+
+            int winnersCnt = 0;
+            int winnersTable[playerCnt];
+            winner_check(playerCnt, players, ctx.tableCards, &winnersCnt, winnersTable);
+            uint64_t winnerMoney = ctx.moneyOnTable / winnersCnt;
+            
+            //add money for winners to balance
+            for( int i = 0; i < winnersCnt; i++)
+            {
+                players[winnersTable[i]].balance += winnerMoney;
+            }
         }
     }
 
