@@ -1,4 +1,5 @@
 #include "../include/player.h"
+#include <stdio.h>
 
 void looking_for_winner(int p_amount, int max, int arr[p_amount], int player_score[p_amount],int *how_many_players_win, int *table_of_winners){
     int max_value = 0;
@@ -249,3 +250,4 @@ void winner_check(int numbers_of_players, player_t players[numbers_of_players], 
         return;
     }
 }
+
