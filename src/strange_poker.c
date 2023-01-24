@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <inttypes.h>
+#include <memory.h>
 
 #include "winning_check.h"
 #include "ui.h"
@@ -229,12 +230,15 @@ int main(int argc, char *argv[])
             ctx.currentPlayer = UINT32_MAX; // show all players' cards
             ui->updateState( ui->data, &ctx );
             
+            //check the winner
             int winnerCnt = 0;
             int winnersTable[playerCnt];
             winner_check(playerCnt, players, ctx.tableCards, &winnerCnt, winnersTable);
 
             if( winnerCnt != 0 )
             {
+                // update balances
+
                 uint64_t winnerMoney = ctx.moneyOnTable / winnerCnt;
                 int rem = (int)( ctx.moneyOnTable - winnerMoney * winnerCnt );
 
@@ -255,6 +259,18 @@ int main(int argc, char *argv[])
                 }
                 
             } else printMessage( ui, &ctx, "Nobody won :(");
+
+            //switch the first player to the last position after the end of the round
+            if( playerCnt > 1 )
+            {
+                player_t tmp = players[0];
+                memmove( players, players + 1, sizeof(player_t) * (playerCnt -1 ) );
+                players[playerCnt-1] = tmp;
+            }
+
+            // ???
+
+            // profit!
         }
     }
 
