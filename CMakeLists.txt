@@ -36,4 +36,10 @@ option(USE_NCURSES_UI "Create ncurses ui backend" ON)
 if (USE_NCURSES_UI)
     add_subdirectory(uibackends/ncurses)
     target_link_libraries(StrangePoker PRIVATE ui-ncurses)
+    
+	list( APPEND CPACK_DEBIAN_PACKAGE_DEPENDS libncurses6 )
 endif ()
+
+set( CPACK_DEBIAN_PACKAGE_MAINTAINER qbojj )
+
+include(CPack)
